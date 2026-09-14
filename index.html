@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>フォーム分析カメラ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-wrapper mode-single" id="appContainer">
+  
+  <div class="top-bar">
+    <div class="view-mode-selector">
+      <button class="mode-tab active" id="tabSingle" onclick="setViewMode('single')">📱 1画面</button>
+      <button class="mode-tab" id="tabSplit" onclick="setViewMode('split')">📱📱 2画面比較</button>
+      <button class="mode-tab" id="tabOverlay" onclick="setViewMode('overlay')">🔲 重ね合わせ</button>
+    </div>
+  </div>
+
+  <div class="view-container">
+    <div class="view-box" id="leftViewBox">
+      <div class="view-header">
+        <span class="view-title">比較対象</span>
+        <label class="btn-file-top">
+          📁 動画/画像を選択
+          <input type="file" id="fileInputLeft" accept="image/*,video/*" style="display:none;">
+        </label>
+      </div>
+      <canvas id="refVideoCanvas"></canvas>
+      <canvas id="refDrawCanvas" class="drawCanvas mode-draw"></canvas>
+      
+      <div class="ref-control-overlay" id="refControls" style="display: none;">
+        <div class="ref-seekbar-container">
+          <input type="range" id="refSeekbar" class="ref-seekbar" min="0" max="100" value="0" step="0.1">
+          <span class="ref-time-display" id="refTimeDisplay">0:00 / 0:00</span>
+        </div>
+        <div class="ref-btn-group">
+          <button id="refPrevBtn" class="btn-mini">◀ 比較コマ</button>
+          <button id="refNextBtn" class="btn-mini">比較コマ ▶</button>
+          <button id="speedBtn" class="btn-mini" onclick="togglePlaybackRate()">🚀 1.0x</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="view-box">
+      <div class="view-header">
+        <span class="view-title" id="rightViewTitle">カメラ映像 (5秒遅延)</span>
+        <label class="btn-file-top" id="mainFileInputLabel">
+          📁 比較用ファイル選択
+          <input type="file" id="fileInputMain" accept="image/*,video/*" style="display:none;">
+        </label>
+      </div>
+
+      <div class="overlay-adjust-panel" id="overlayAdjustPanel">
+        <div class="adjust-row">
+          <span>透かし:</span>
+          <input type="range" id="opacitySlider" class="adjust-slider" min="0.1" max="0.9" step="0.05" value="0.5">
+        </div>
+        <div class="adjust-row">
+          <span>拡大:</span>
+          <input type="range" id="zoomSlider" class="adjust-slider" min="0.5" max="2.0" step="0.05" value="1.0">
+        </div>
+        <div class="adjust-row" style="justify-content: flex-end;">
+          <button class="btn-mini" onclick="resetRefTransform()" style="padding:2px 6px; font-size:10px;">🎯 位置リセット</button>
+        </div>
+      </div>
+
+      <canvas id="videoCanvas"></canvas>
+      <canvas id="drawCanvas" class="drawCanvas mode-move"></canvas>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="control-row">
+      <button id="startResetBtn" class="btn-main">▶ カメラ起動</button>
+      <button id="switchCamBtn" class="btn-step" disabled>📷 切替</button>
+      
+      <div class="seg-group">
+        <button class="seg-btn" onclick="setDelay(0, this)">0秒</button>
+        <button class="seg-btn" onclick="setDelay(1, this)">1秒</button>
+        <button class="seg-btn" onclick="setDelay(3, this)">3秒</button>
+        <button class="seg-btn active" onclick="setDelay(5, this)">5秒</button>
+        <button class="seg-btn" onclick="setDelay(7, this)">7秒</button>
+      </div>
+
+      <button id="pauseBtn" class="btn-pause" disabled>⏸ 一時停止</button>
+      <button id="prevFrameBtn" class="btn-step" disabled>◀ カメラコマ</button>
+      <button id="nextFrameBtn" class="btn-step" disabled>カメラコマ ▶</button>
+    </div>
+
+    <div class="control-row">
+      <button id="actionModeBtn" class="btn-move" disabled>🖐️ 位置調整</button>
+      <button id="modeBtn" class="btn-tool" disabled>✏️ フリーハンド</button>
+
+      <div class="color-group">
+        <button class="btn-color active" style="background: #00ff00;" onclick="setLineColor('#00ff00', this)"></button>
+        <button class="btn-color" style="background: #ff0000;" onclick="setLineColor('#ff0000', this)"></button>
+        <button class="btn-color" style="background: #ffff00;" onclick="setLineColor('#ffff00', this)"></button>
+        <button class="btn-color" style="background: #00ffff;" onclick="setLineColor('#00ffff', this)"></button>
+      </div>
+
+      <button id="clearLinesBtn" class="btn-clear" disabled>🗑️ 削除</button>
+      <button id="saveBtn" class="btn-save" disabled>💾 画像保存</button>
+    </div>
+
+    <p class="status" id="statusText">「カメラ起動」を押してください。</p>
+    <footer class="app-footer">©sakuma.kouhei</footer>
+  </div>
+</div>
+
+<video id="webcam" autoplay playsinline style="display:none;"></video>
+<video id="refVideo" loop playsinline style="display:none;"></video>
+
+<script src="script.js"></script>
+</body>
+</html>
